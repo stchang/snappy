@@ -1,17 +1,36 @@
 #lang racket
 
-(require "snappy.rkt")
+(require rackunit
+         "snappy.rkt")
 
-(define-values (compressed len status)
-  (snappy_compress #"11111111112222222222"))
+(define bstr #"11111111112222222222")
+(define-values (compressed len-1 status-1)
+  (snappy_compress bstr))
 
-;(define new-compressed (subbytes compressed 0 len))
+(define new-compressed (subbytes compressed 0 len-1))
 
-;(snappy_uncompress new-compressed)
+(define-values (uncompressed len-2 status-2)
+  (snappy_uncompress new-compressed))
 
-;(snappy_max_compressed_length 10)
+(check-equal?
+ (subbytes uncompressed 0 len-2)
+ bstr)
 
-;(snappy_uncompressed_length new-compressed)
+(check-equal?
+ (uncompress (compress bstr))
+ bstr)
 
-(uncompress (compress #"11111111112222222222"))
-;(snappy_validate_compressed_buffer new-compressed)
+(check-true (valid-compression? (compress bstr)))
+
+;; random testing
+(define (random-byte) (random 10))
+
+(define (random-bstr)
+  (list->bytes (for/list ([_ 50000]) (random-byte))))
+
+(for ([n 100])
+  (define input (random-bstr))
+  (check-true valid-compression? (compress bstr))
+  (check-equal?
+   input
+   (uncompress (compress input))))
