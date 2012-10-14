@@ -1,32 +1,42 @@
 #lang racket/base
 
 (require ffi/unsafe
-         ffi/unsafe/define)
+         ffi/unsafe/define
+         racket/format)
 
-(define-ffi-definer define-snappy (ffi-lib "libsnappy"))
+(define-ffi-definer define-snappy
+  (ffi-lib "libsnappy" '("1" #f)))
 
 (provide snappy_compress snappy_uncompress
          snappy_max_compressed_length snappy_uncompressed_length
          snappy_validate_compressed_buffer
          compress uncompress valid-compression?)
 
+;; snappy_status
+(define _snappy_status
+  (_enum '(ok invalid too-small)))
+
 ;; compress : Bytes -> Bytes
 (define (compress input)
   (define-values (compressed len status) (snappy_compress input))
-  (unless (zero? status) (error "could not compress"))
+  (check-status "compress" status) 
   (subbytes compressed 0 len))
 
 ;; uncompress : Bytes -> Bytes
 (define (uncompress input)
   (define-values (uncompressed len status) (snappy_uncompress input))
-  (unless (zero? status) (error "could not uncompress"))
+  (check-status "uncompress" status)
   (subbytes uncompressed 0 len))
 
 ;; valid-compression? : Bytes -> Boolean
 (define (valid-compression? compressed)
-  (zero? (snappy_validate_compressed_buffer compressed)))
-  
-  
+  (eq? 'ok (snappy_validate_compressed_buffer compressed)))
+
+;; check-status : (U 'ok 'invalid 'too-small) -> void?
+(define (check-status op status)
+  (case status
+    [(invalid) (error (~a op ": invalid input"))]
+    [(too-small) (error (~a op ": input buffer too small"))]))
 
 ;; snappy_status snappy_compress(const char* input,
 ;;                               size_t input_length,
@@ -38,7 +48,7 @@
         (compressed : (_bytes o (snappy_max_compressed_length
                                  (bytes-length input))))
         (compressed_length : (_ptr o _uint))
-        -> (status : _uint)
+        -> (status : _snappy_status)
         -> (values compressed compressed_length status)))
 
 ;; snappy_status snappy_uncompress(const char* compressed,
@@ -50,7 +60,7 @@
         (_uint = (bytes-length input))
         (uncompressed : (_bytes o 100))
         (uncompressed_length : (_ptr o _uint))
-        -> (status : _uint)
+        -> (status : _snappy_status)
         -> (values uncompressed uncompressed_length status)))
 
 ;;size_t snappy_max_compressed_length(size_t source_length);
@@ -64,7 +74,7 @@
   (_fun (input : _bytes)
         (_uint = (bytes-length input))
         (length : (_ptr o _uint))
-        -> (status : _uint)
+        -> (status : _snappy_status)
         -> (values length status)))
 
 
@@ -74,4 +84,4 @@
 (define-snappy snappy_validate_compressed_buffer
   (_fun (input : _bytes)
         (_uint = (bytes-length input))
-        -> (status : _uint)))
+        -> (status : _snappy_status)))
