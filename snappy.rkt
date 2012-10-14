@@ -19,7 +19,7 @@
 ;; compress : Bytes -> Bytes
 (define (compress input)
   (define-values (compressed len status) (snappy_compress input))
-  (check-status "compress" status) 
+  (check-status "compress" status)
   (subbytes compressed 0 len))
 
 ;; uncompress : Bytes -> Bytes
@@ -44,10 +44,10 @@
 ;;                               size_t* compressed_length);
 (define-snappy snappy_compress
   (_fun (input : _bytes)
-        (_uint = (bytes-length input))
+        (input-length : _long = (bytes-length input))
         (compressed : (_bytes o (snappy_max_compressed_length
-                                 (bytes-length input))))
-        (compressed_length : (_ptr o _uint))
+                                 input-length)))
+        (compressed_length : (_ptr o _long))
         -> (status : _snappy_status)
         -> (values compressed compressed_length status)))
 
@@ -57,23 +57,32 @@
 ;;                                 size_t* uncompressed_length);
 (define-snappy snappy_uncompress
   (_fun (input : _bytes)
-        (_uint = (bytes-length input))
-        (uncompressed : (_bytes o 100))
-        (uncompressed_length : (_ptr o _uint))
+        (_long = (bytes-length input))
+        (uncompressed : (_bytes o (uncompressed-length input)))
+        (uncompressed_length : (_ptr o _long))
         -> (status : _snappy_status)
         -> (values uncompressed uncompressed_length status)))
 
+;; uncompressed-length : bytes -> int
+;; utility function for above binding
+(define (uncompressed-length bytes)
+  (define-values (len stat)
+    (snappy_uncompressed_length bytes))
+  (when (eq? stat 'invalid)
+    (error "compressed buffer failed to parse"))
+  len)
+
 ;;size_t snappy_max_compressed_length(size_t source_length);
 (define-snappy snappy_max_compressed_length
-  (_fun _uint -> _uint))
+  (_fun _long -> _long))
 
 ;; snappy_status snappy_uncompressed_length(const char* compressed,
 ;;                                          size_t compressed_length,
 ;;                                          size_t* result);
 (define-snappy snappy_uncompressed_length
   (_fun (input : _bytes)
-        (_uint = (bytes-length input))
-        (length : (_ptr o _uint))
+        (_long = (bytes-length input))
+        (length : (_ptr o _long))
         -> (status : _snappy_status)
         -> (values length status)))
 
@@ -83,5 +92,5 @@
 ;;       size_t compressed_length);
 (define-snappy snappy_validate_compressed_buffer
   (_fun (input : _bytes)
-        (_uint = (bytes-length input))
+        (_long = (bytes-length input))
         -> (status : _snappy_status)))
