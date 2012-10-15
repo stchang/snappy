@@ -30,7 +30,7 @@
 
 (for ([n 100])
   (define input (random-bstr))
-  (check-true valid-compression? (compress bstr))
+  (check-true (valid-compression? (compress input)))
   (check-equal?
    input
    (uncompress (compress input))))
