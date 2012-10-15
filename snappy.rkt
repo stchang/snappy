@@ -2,7 +2,8 @@
 
 (require ffi/unsafe
          ffi/unsafe/define
-         racket/format)
+         racket/format
+         (rename-in racket/contract [-> ->/c]))
 
 (define-ffi-definer define-snappy
   (ffi-lib "libsnappy" '("1" #f)))
@@ -10,7 +11,11 @@
 (provide snappy_compress snappy_uncompress
          snappy_max_compressed_length snappy_uncompressed_length
          snappy_validate_compressed_buffer
-         compress uncompress valid-compression?)
+
+         (contract-out
+          [compress (->/c bytes? bytes?)]
+          [uncompress (->/c (and/c bytes? valid-compression?) bytes?)]
+          [valid-compression? (->/c bytes? any)]))
 
 ;; snappy_status
 (define _snappy_status

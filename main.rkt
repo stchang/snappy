@@ -18,7 +18,7 @@
     resulting bytestring.
   }
 
-  @defproc[(uncompress [input bytes?]) bytes?]{
+  @defproc[(uncompress [input (and/c bytes? valid-compression?)]) bytes?]{
     Uncompresses the input bytestring and returns the
     resulting bytestring.
   }
