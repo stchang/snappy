@@ -29,4 +29,4 @@
 
 (define mcfly-license      "New BSD License")
 
-(define mcfly-legal        "Copyright 2012 Stephen Chang & Asumu Takikwa.")
+(define mcfly-legal        "Copyright 2012 Stephen Chang & Asumu Takikawa.")
