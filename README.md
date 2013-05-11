@@ -13,6 +13,34 @@ On older versions of Racket:
 
 ---
 
+```racket
+ (require snappy)
+```
+
+```racket
+(compress input) -> bytes?
+  input : bytes?
+```
+
+Compresses the input bytestring and returns the resulting bytestring.
+
+```racket
+(uncompress input) -> bytes?
+  input : (and/c bytes? valid-compression?)
+```
+
+Uncompresses the input bytestring and returns the resulting bytestring.
+
+```racket
+(valid-compression? input) -> boolean?
+  input : bytes?
+```
+
+Returns `#t` if `input` is a compressed bytestring that can be
+uncompressed with Snappy. Otherwise returns `#f`.
+
+---
+
 Copyright (c) 2013 Stephen Chang, Asumu Takikawa
 
 Licensed under the BSD license. See COPYING.
