@@ -1,6 +1,10 @@
 #lang scribble/manual
 
-@(require (for-label snappy))
+@(require (for-label racket/base
+                     racket/contract
+                     snappy))
+
+@title{Snappy: FFI bindings for fast compression}
 
 @section{Introduction}
 
