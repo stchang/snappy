@@ -1,6 +1,8 @@
 Racket FFI bindings for snappy
 ==============================
 
+[![Scribble](https://img.shields.io/badge/Docs-Scribble-blue.svg)](http://pkg-build.racket-lang.org/doc/snappy/index.html)
+
 Racket FFI bindings for the [snappy](http://code.google.com/p/snappy/)
 compression library.
 
@@ -41,7 +43,7 @@ uncompressed with Snappy. Otherwise returns `#f`.
 
 ---
 
-Copyright (c) 2013 Stephen Chang, Asumu Takikawa
+Copyright (c) 2013-2015 Stephen Chang, Asumu Takikawa
 
 Licensed under the BSD license. See COPYING.
 
